@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX — Train Beyond Limits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--black:#080808;--white:#f5f4f0;--lime:#c8f53a;--gray-1:#111111;--gray-2:#1a1a1a;--gray-3:#2a2a2a;--gray-muted:#555;--gray-light:#888;--font-display:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace}
+  html{scroll-behavior:smooth}
+  body{background:var(--black);color:var(--white);font-family:var(--font-body);font-weight:300;overflow-x:hidden;cursor:none}
+  .cursor{width:10px;height:10px;background:var(--lime);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;mix-blend-mode:difference}
+  .cursor-ring{width:36px;height:36px;border:1px solid rgba(200,245,58,0.4);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:width .2s,height .2s,border-color .2s}
+  .cursor-ring.hover{width:52px;height:52px;border-color:var(--lime)}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:28px 48px;background:linear-gradient(to bottom,rgba(8,8,8,.95),transparent)}
+  .nav-logo{font-family:var(--font-display);font-size:28px;letter-spacing:4px;color:var(--white);text-decoration:none}
+  .nav-logo span{color:var(--lime)}
+  .nav-links{display:flex;gap:36px;list-style:none}
+  .nav-links a{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-light);text-decoration:none;transition:color .2s}
+  .nav-links a:hover{color:var(--white)}
+  .nav-cta{background:var(--lime);color:var(--black);border:none;padding:12px 28px;font-family:var(--font-body);font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:none;transition:transform .2s}
+  .nav-cta:hover{transform:scale(1.03)}
+
+  .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px 80px;position:relative;overflow:hidden}
+  .hero-img{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600&q=80&fit=crop');background-size:cover;background-position:center 30%;filter:brightness(.35) saturate(.7)}
+  .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,1) 0%,rgba(8,8,8,.4) 50%,rgba(8,8,8,.1) 100%)}
+  .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:80px 80px}
+  .hero-tag{font-family:var(--font-mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:24px;opacity:0;animation:fadeUp .8s .2s forwards;position:relative}
+  .hero-title{font-family:var(--font-display);font-size:clamp(80px,14vw,200px);line-height:.9;letter-spacing:2px;opacity:0;animation:fadeUp .8s .4s forwards;position:relative}
+  .hero-title .outline{-webkit-text-stroke:1px rgba(245,244,240,.3);color:transparent}
+  .hero-title .lime{color:var(--lime)}
+  .hero-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:60px;opacity:0;animation:fadeUp .8s .6s forwards;position:relative}
+  .hero-sub{max-width:380px;font-size:16px;line-height:1.7;color:var(--gray-light);font-weight:300}
+  .hero-stats{display:flex;gap:48px}
+  .stat-item{text-align:right}
+  .stat-num{font-family:var(--font-display);font-size:52px;color:var(--white);line-height:1}
+  .stat-num span{color:var(--lime);font-size:28px}
+  .stat-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-muted);margin-top:4px}
+  .scroll-indicator{position:absolute;bottom:40px;left:48px;display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-muted);opacity:0;animation:fadeUp .8s 1s forwards}
+  .scroll-line{width:40px;height:1px;background:var(--gray-3);position:relative;overflow:hidden}
+  .scroll-line::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--lime);animation:scrollAnim 2s 1.5s infinite}
+
+  .marquee-section{border-top:1px solid var(--gray-3);border-bottom:1px solid var(--gray-3);padding:20px 0;overflow:hidden;background:var(--gray-1)}
+  .marquee-track{display:flex;animation:marquee 20s linear infinite;width:max-content}
+  .marquee-item{display:flex;align-items:center;gap:20px;padding:0 40px;font-family:var(--font-display);font-size:18px;letter-spacing:4px;color:var(--gray-muted);white-space:nowrap}
+  .marquee-dot{width:6px;height:6px;background:var(--lime);border-radius:50%}
+
+  .split-section{display:grid;grid-template-columns:1fr 1fr;min-height:600px}
+  .split-img{position:relative;overflow:hidden}
+  .split-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(.6);transition:transform .8s ease,filter .4s;display:block}
+  .split-img:hover img{transform:scale(1.04);filter:brightness(.65) saturate(.8)}
+  .split-img-label{position:absolute;bottom:32px;left:32px;font-family:var(--font-display);font-size:36px;letter-spacing:2px;color:var(--white)}
+  .split-img-label span{color:var(--lime)}
+  .split-content{background:var(--gray-1);padding:80px 60px;display:flex;flex-direction:column;justify-content:center}
+  .section-tag{font-family:var(--font-mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:20px}
+  .section-title{font-family:var(--font-display);font-size:clamp(48px,6vw,88px);line-height:.95;letter-spacing:1px}
+  .section-title .dim{color:var(--gray-muted)}
+  .philosophy-items{display:flex;flex-direction:column;gap:28px;margin-top:40px}
+  .philosophy-item{border-left:1px solid var(--gray-3);padding-left:24px;transition:border-color .3s}
+  .philosophy-item:hover{border-color:var(--lime)}
+  .philosophy-item h3{font-weight:500;font-size:16px;margin-bottom:6px;color:var(--white)}
+  .philosophy-item p{font-size:14px;line-height:1.7;color:var(--gray-light)}
+
+  .gallery-strip{display:grid;grid-template-columns:2fr 1fr 1fr;gap:2px;height:380px;margin-bottom:2px}
+  .gallery-strip-bottom{display:grid;grid-template-columns:1fr 1fr 2fr;gap:2px;height:280px}
+  .gallery-item{overflow:hidden;position:relative}
+  .gallery-item img{width:100%;height:100%;object-fit:cover;filter:brightness(.6) saturate(.5);transition:transform .6s ease,filter .4s;display:block}
+  .gallery-item:hover img{transform:scale(1.05);filter:brightness(.8) saturate(.7)}
+  .gallery-label{position:absolute;bottom:20px;left:20px;font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5)}
+
+  .programs{padding:100px 48px 140px}
+  .programs-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:60px}
+  .programs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+  .program-card{position:relative;overflow:hidden;min-height:460px;display:flex;flex-direction:column;justify-content:flex-end;padding:36px 32px;cursor:none}
+  .program-card-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.35) saturate(.6);transition:transform .6s ease,filter .4s}
+  .program-card:hover .program-card-img{transform:scale(1.06);filter:brightness(.5) saturate(.8)}
+  .program-card::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,.95) 0%,rgba(8,8,8,.3) 60%,transparent 100%)}
+  .program-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--lime);transform:scaleX(0);transform-origin:left;transition:transform .4s ease;z-index:2}
+  .program-card:hover::before{transform:scaleX(1)}
+  .program-content{position:relative;z-index:1}
+  .program-num{font-family:var(--font-mono);font-size:11px;color:var(--gray-muted);letter-spacing:2px;margin-bottom:16px}
+  .program-card h3{font-family:var(--font-display);font-size:48px;letter-spacing:1px;margin-bottom:12px;line-height:1}
+  .program-card p{font-size:14px;line-height:1.7;color:var(--gray-light);margin-bottom:20px}
+  .program-tag{display:inline-block;border:1px solid rgba(255,255,255,.15);padding:5px 12px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-muted);margin-right:6px;margin-bottom:6px}
+  .program-arrow{position:absolute;bottom:36px;right:32px;font-size:22px;color:rgba(255,255,255,.2);transition:color .3s,transform .3s;z-index:1}
+  .program-card:hover .program-arrow{color:var(--lime);transform:translate(4px,-4px)}
+
+  .testimonials{background:var(--gray-1);padding:140px 48px}
+  .testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:60px}
+  .testimonial{background:var(--gray-2);padding:40px 32px}
+  .testimonial-text{font-size:15px;line-height:1.8;color:var(--gray-light);margin-bottom:28px;font-style:italic}
+  .testimonial-name{font-weight:500;font-size:13px;letter-spacing:1px;color:var(--white)}
+  .testimonial-role{font-size:12px;color:var(--gray-muted);margin-top:4px}
+
+  .pricing{padding:140px 48px}
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:60px}
+  .pricing-card{background:var(--gray-1);padding:48px 36px}
+  .pricing-card.featured{background:var(--lime)}
+  .pricing-card.featured *{color:var(--black)!important}
+  .price-label{font-family:var(--font-mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gray-muted);margin-bottom:24px}
+  .price-amount{font-family:var(--font-display);font-size:72px;color:var(--white);line-height:1;margin-bottom:8px}
+  .price-period{font-size:13px;color:var(--gray-muted);margin-bottom:36px}
+  .price-features{list-style:none;margin-bottom:40px}
+  .price-features li{font-size:14px;color:var(--gray-light);padding:10px 0;border-bottom:1px solid var(--gray-3);display:flex;align-items:center;gap:10px}
+  .pricing-card.featured .price-features li{border-color:rgba(0,0,0,.15)}
+  .check{color:var(--lime)}
+  .pricing-card.featured .check{color:var(--black)}
+  .pricing-btn{display:block;width:100%;padding:16px;border:1px solid var(--gray-3);background:transparent;color:var(--white);font-family:var(--font-body);font-size:13px;letter-spacing:2px;text-transform:uppercase;cursor:none;transition:all .2s;text-align:center;text-decoration:none}
+  .pricing-btn:hover{background:var(--white);color:var(--black);border-color:var(--white)}
+  .pricing-card.featured .pricing-btn{background:var(--black);color:var(--lime);border-color:var(--black)}
+
+  .final-cta{position:relative;min-height:600px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 48px;overflow:hidden}
+  .final-cta-img{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=1600&q=80&fit=crop');background-size:cover;background-position:center 40%;filter:brightness(.2) saturate(.5)}
+  .final-cta-overlay{position:absolute;inset:0;background:rgba(8,8,8,.6)}
+  .final-cta h2{font-family:var(--font-display);font-size:clamp(56px,8vw,120px);line-height:.9;margin-bottom:32px;position:relative;z-index:1}
+  .final-cta p{font-size:16px;color:var(--gray-light);max-width:500px;margin:0 auto 48px;line-height:1.7;position:relative;z-index:1}
+  .cta-big{display:inline-block;background:var(--lime);color:var(--black);padding:20px 56px;font-family:var(--font-body);font-size:14px;font-weight:500;letter-spacing:2px;text-transform:uppercase;text-decoration:none;cursor:none;position:relative;z-index:1;transition:transform .2s}
+  .cta-big:hover{transform:scale(1.04)}
+
+  footer{background:var(--gray-1);border-top:1px solid var(--gray-3);padding:60px 48px;display:flex;justify-content:space-between;align-items:center}
+  .footer-logo{font-family:var(--font-display);font-size:32px;letter-spacing:4px}
+  .footer-logo span{color:var(--lime)}
+  footer p{font-size:13px;color:var(--gray-muted)}
+
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+  .reveal.visible{opacity:1;transform:none}
+
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes scrollAnim{0%{left:-100%}100%{left:100%}}
+
+  @media(max-width:900px){
+    nav{padding:24px}.nav-links{display:none}
+    .hero{padding:0 24px 60px}
+    .hero-title{font-size:clamp(64px,18vw,100px)}
+    .hero-bottom{flex-direction:column;align-items:flex-start;gap:40px}
+    .split-section{grid-template-columns:1fr}
+    .split-img{min-height:300px}
+    .programs,.testimonials,.pricing{padding:80px 24px}
+    .programs-grid,.testimonials-grid,.pricing-grid{grid-template-columns:1fr}
+    .gallery-strip,.gallery-strip-bottom{grid-template-columns:1fr 1fr;height:auto}
+    .gallery-item{height:180px}
+    .gallery-strip .gallery-item:first-child,.gallery-strip-bottom .gallery-item:last-child{grid-column:span 2}
+    .programs-header{flex-direction:column;align-items:flex-start;gap:16px}
+    footer{flex-direction:column;gap:24px;text-align:center;padding:40px 24px}
+    body{cursor:auto}.cursor,.cursor-ring{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="#" class="nav-logo">APE<span>X</span></a>
+  <ul class="nav-links">
+    <li><a href="#programs">Programs</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <button class="nav-cta">Start Today</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-img"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grid"></div>
+  <div class="scroll-indicator"><div class="scroll-line"></div>Scroll</div>
+  <p class="hero-tag">// Est. 2019 — Sofia, Bulgaria</p>
+  <h1 class="hero-title">
+    TRAIN<br>
+    <span class="outline">BEYOND</span><br>
+    <span class="lime">LIMITS</span>
+  </h1>
+  <div class="hero-bottom">
+    <p class="hero-sub">A precision training environment built for those who refuse to settle. Science-backed methodology. Zero compromises.</p>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">12<span>K+</span></div><div class="stat-label">Members</div></div>
+      <div class="stat-item"><div class="stat-num">98<span>%</span></div><div class="stat-label">Retention</div></div>
+      <div class="stat-item"><div class="stat-num">6<span>yr</span></div><div class="stat-label">Operating</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><span>Strength Training</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>HIIT &amp; Cardio</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Personal Coaching</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Nutrition Plans</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Body Composition</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Recovery Protocol</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Performance Tracking</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Strength Training</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>HIIT &amp; Cardio</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Personal Coaching</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Nutrition Plans</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Body Composition</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Recovery Protocol</span><div class="marquee-dot"></div></div>
+    <div class="marquee-item"><span>Performance Tracking</span><div class="marquee-dot"></div></div>
+  </div>
+</div>
+
+<section class="split-section" id="about">
+  <div class="split-img reveal">
+    <img src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=900&q=80&fit=crop" alt="Gym" loading="lazy">
+    <div class="split-img-label">EST. <span>2019</span></div>
+  </div>
+  <div class="split-content reveal">
+    <p class="section-tag">// Our philosophy</p>
+    <h2 class="section-title">NO<br><span class="dim">SHORTCUTS.</span><br>NO<br><span class="dim">EXCUSES.</span></h2>
+    <div class="philosophy-items">
+      <div class="philosophy-item">
+        <h3>Data-Driven Training</h3>
+        <p>Every program is built on evidence. We track what matters, cut what doesn't, and optimize for your specific physiology.</p>
+      </div>
+      <div class="philosophy-item">
+        <h3>Elite Environment</h3>
+        <p>State-of-the-art equipment maintained to competition standard. The space itself demands more from you.</p>
+      </div>
+      <div class="philosophy-item">
+        <h3>Expert Coaches</h3>
+        <p>Our coaches don't just count reps — they engineer results. Average client transformation: 12 weeks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gallery-strip">
+  <div class="gallery-item">
+    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&q=80&fit=crop" alt="Training floor" loading="lazy">
+    <div class="gallery-label">Training floor</div>
+  </div>
+  <div class="gallery-item">
+    <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&q=80&fit=crop" alt="Free weights" loading="lazy">
+    <div class="gallery-label">Free weights</div>
+  </div>
+  <div class="gallery-item">
+    <img src="https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=600&q=80&fit=crop" alt="Cardio zone" loading="lazy">
+    <div class="gallery-label">Cardio zone</div>
+  </div>
+</div>
+<div class="gallery-strip-bottom">
+  <div class="gallery-item">
+    <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&q=80&fit=crop" alt="Coaching" loading="lazy">
+    <div class="gallery-label">Coaching</div>
+  </div>
+  <div class="gallery-item">
+    <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=600&q=80&fit=crop" alt="Recovery" loading="lazy">
+    <div class="gallery-label">Recovery</div>
+  </div>
+  <div class="gallery-item">
+    <img src="https://images.unsplash.com/photo-1521804906057-1df8fdb718b7?w=900&q=80&fit=crop" alt="Community" loading="lazy">
+    <div class="gallery-label">Community</div>
+  </div>
+</div>
+
+<section class="programs" id="programs">
+  <div class="programs-header reveal">
+    <div>
+      <p class="section-tag">// Programs</p>
+      <h2 class="section-title">CHOOSE<br><span style="color:var(--gray-muted)">YOUR PATH</span></h2>
+    </div>
+    <p style="color:var(--gray-light);font-size:14px;max-width:300px;line-height:1.7;">Three tracks. One standard. All designed to get you somewhere you've never been.</p>
+  </div>
+  <div class="programs-grid">
+    <div class="program-card reveal">
+      <div class="program-card-img" style="background-image:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&fit=crop')"></div>
+      <div class="program-content">
+        <div class="program-num">01</div>
+        <h3>STRENGTH</h3>
+        <p>Progressive overload methodology for maximal hypertrophy and raw power output. 4x per week.</p>
+        <span class="program-tag">Powerlifting</span><span class="program-tag">Hypertrophy</span>
+      </div>
+      <div class="program-arrow">→</div>
+    </div>
+    <div class="program-card reveal" style="transition-delay:.1s">
+      <div class="program-card-img" style="background-image:url('https://images.unsplash.com/photo-1576678927484-cc907957088c?w=800&q=80&fit=crop')"></div>
+      <div class="program-content">
+        <div class="program-num">02</div>
+        <h3>ENDURANCE</h3>
+        <p>VO2 max protocols, zone training, and metabolic conditioning. Built for performance, not just aesthetics.</p>
+        <span class="program-tag">Cardio</span><span class="program-tag">HIIT</span>
+      </div>
+      <div class="program-arrow">→</div>
+    </div>
+    <div class="program-card reveal" style="transition-delay:.2s">
+      <div class="program-card-img" style="background-image:url('https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&q=80&fit=crop')"></div>
+      <div class="program-content">
+        <div class="program-num">03</div>
+        <h3>ELITE</h3>
+        <p>Full-spectrum coaching. Strength, conditioning, nutrition, and recovery — fully personalized.</p>
+        <span class="program-tag">1-on-1</span><span class="program-tag">Full Access</span>
+      </div>
+      <div class="program-arrow">→</div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="reveal">
+    <p class="section-tag">// Results</p>
+    <h2 class="section-title">REAL<br><span style="color:var(--gray-muted)">PEOPLE.</span></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial reveal">
+      <p class="testimonial-text">"In 3 months I hit numbers I didn't think were possible for me. The coaching here isn't motivational fluff — it's surgical."</p>
+      <div class="testimonial-name">Dimitar K.</div>
+      <div class="testimonial-role">Software Engineer, Member since 2022</div>
+    </div>
+    <div class="testimonial reveal" style="transition-delay:.1s">
+      <p class="testimonial-text">"Lost 14kg and kept it off for over a year. The nutrition programming changed how I think about food completely."</p>
+      <div class="testimonial-name">Maria V.</div>
+      <div class="testimonial-role">Architect, Member since 2021</div>
+    </div>
+    <div class="testimonial reveal" style="transition-delay:.2s">
+      <p class="testimonial-text">"Every other gym I tried felt like a social club. APEX is the first place where I felt like everyone around me was serious."</p>
+      <div class="testimonial-name">Nikolay P.</div>
+      <div class="testimonial-role">Entrepreneur, Member since 2023</div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="reveal">
+    <p class="section-tag">// Membership</p>
+    <h2 class="section-title">INVEST<br><span style="color:var(--gray-muted)">IN YOURSELF</span></h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <div class="price-label">Starter</div>
+      <div class="price-amount">€49</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Full gym access</li>
+        <li><span class="check">✓</span> Group classes</li>
+        <li><span class="check">✓</span> App tracking</li>
+        <li style="opacity:.3"><span>—</span> Personal coaching</li>
+        <li style="opacity:.3"><span>—</span> Nutrition plan</li>
+      </ul>
+      <a href="#" class="pricing-btn">Get Started</a>
+    </div>
+    <div class="pricing-card featured reveal" style="transition-delay:.1s">
+      <div class="price-label">Pro — Most Popular</div>
+      <div class="price-amount">€89</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Full gym access</li>
+        <li><span class="check">✓</span> Group classes</li>
+        <li><span class="check">✓</span> App tracking</li>
+        <li><span class="check">✓</span> 4x coaching/month</li>
+        <li><span class="check">✓</span> Nutrition plan</li>
+      </ul>
+      <a href="#" class="pricing-btn">Get Started</a>
+    </div>
+    <div class="pricing-card reveal" style="transition-delay:.2s">
+      <div class="price-label">Elite</div>
+      <div class="price-amount">€199</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> Full gym access</li>
+        <li><span class="check">✓</span> Group classes</li>
+        <li><span class="check">✓</span> App tracking</li>
+        <li><span class="check">✓</span> Unlimited coaching</li>
+        <li><span class="check">✓</span> Full nutrition protocol</li>
+      </ul>
+      <a href="#" class="pricing-btn">Get Started</a>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="final-cta-img"></div>
+  <div class="final-cta-overlay"></div>
+  <h2 class="reveal">READY TO<br><span style="color:var(--lime)">BEGIN?</span></h2>
+  <p class="reveal">The first step is the hardest one. After that, the work speaks for itself.</p>
+  <a href="#" class="cta-big reveal">Claim Your Spot</a>
+</section>
+
+<footer>
+  <div class="footer-logo">APE<span>X</span></div>
+  <p>© 2024 APEX Training. Sofia, Bulgaria.</p>
+  <p>Built by pavel798</p>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.transform=`translate(${mx-5}px,${my-5}px)`;
+});
+function animateRing(){
+  rx+=(mx-rx-18)*.12;ry+=(my-ry-18)*.12;
+  ring.style.transform=`translate(${rx}px,${ry}px)`;
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>ring.classList.add('hover'));
+  el.addEventListener('mouseleave',()=>ring.classList.remove('hover'));
+});
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
